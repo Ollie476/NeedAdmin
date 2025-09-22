@@ -18,12 +18,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class HelpCommand implements CommandExecutor {
+    private final String[] helpLore = {"left:accept", "right:reply", "shift:delete"};
+
     public static class AdminData {
         public static void removeValues(Player player) {
             player.getPersistentDataContainer().remove(new NamespacedKey("request", "message"));
@@ -137,7 +137,14 @@ public class HelpCommand implements CommandExecutor {
     }
 
     private void helpMessage(Player commandPlayer) {
-        commandPlayer.sendMessage(ChatColor.AQUA + "Commands: \n - request <message> -> sends a message to admin team \n - cancel -> cancels request sent \n - queue -> allows admins to see all requests sent");
+        commandPlayer.sendMessage(ChatColor.AQUA + "Commands: " +
+                "\n - request <message> -> sends a message to the admin team " +
+                "\n - cancel -> cancels request sent " +
+                "\n - queue -> allows admins to see all requests sent" +
+                "\nIn Queue Inventory (for Admins): " +
+                "\n - left click -> accepts request and teleports to request sender" +
+                "\n - right click -> replies to request" +
+                "\n - shift + right click -> deletes request");
     }
 
     private void viewQueue(Player commandPlayer) {
@@ -168,7 +175,13 @@ public class HelpCommand implements CommandExecutor {
                                 PersistentDataType.STRING
                         )
                 ).ifPresent(msg -> {
-                    playerMeta.setLore(List.of(ChatColor.AQUA + msg));
+                    playerMeta.setLore(List.of(
+                            ChatColor.AQUA + msg,
+                            "",
+                            ChatColor.GOLD + "" + ChatColor.BOLD + helpLore[0],
+                            ChatColor.GOLD + "" + ChatColor.BOLD + helpLore[1],
+                            ChatColor.GOLD + "" + ChatColor.BOLD + helpLore[2]
+                            ));
                 });
 
 

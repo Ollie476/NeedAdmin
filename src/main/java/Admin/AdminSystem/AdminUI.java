@@ -1,13 +1,11 @@
 package Admin.AdminSystem;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Bukkit;
+import org.bukkit.*;
 
 
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,7 +25,7 @@ import java.util.UUID;
 
 public class AdminUI implements Listener {
     static final Map<UUID, UUID> responseMap = new HashMap<UUID, UUID>();
-    static final Map<UUID, Block> originalBlockMap = new HashMap<>();
+    static final Map<UUID, BlockSnapshot> originalBlockMap = new HashMap<>();
     private Plugin plugin;
 
     public AdminUI(Plugin plugin) {
@@ -42,8 +40,6 @@ public class AdminUI implements Listener {
         if (clickedItem == null || !clickedItem.hasItemMeta())
             return;
 
-        e.setCancelled(true);
-
         ItemMeta itemMeta = clickedItem.getItemMeta();
         String helpPlayerName = ChatColor.stripColor(itemMeta.getDisplayName());
 
@@ -54,12 +50,14 @@ public class AdminUI implements Listener {
                 player.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + "Player is offline");
             }
 
-            if (e.getClick() == ClickType.MIDDLE) {
+            else if (e.isShiftClick()) {
+                e.setCancelled(true);
                 removeRequest(e, player, target);
                 return;
             }
 
-            if (e.isRightClick()) {
+            else if (e.isRightClick()) {
+                e.setCancelled(true);
                 openMessager(player, target);
                 return;
             }
@@ -90,17 +88,19 @@ public class AdminUI implements Listener {
     }
 
     private void openMessager(Player player, Player target) {
-        Block block = player.getLocation().getBlock();
+        Block block = player.getLocation().add(0, 3, 0).getBlock();
 
-        originalBlockMap.put(player.getUniqueId(), block);
+        BlockSnapshot blockSnapshot = new BlockSnapshot(block.getType(), block.getBlockData());
+        originalBlockMap.put(player.getUniqueId(), blockSnapshot);
 
 
         block.setType(Material.OAK_SIGN);
         Sign sign = (Sign) block.getState();
-        sign.update();
 
         responseMap.put(player.getUniqueId(), target.getUniqueId());
-        player.openSign(sign);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            player.openSign(sign);
+        });;
     }
 
     private void removeRequest(InventoryClickEvent e, Player player, Player helpPlayer) {
