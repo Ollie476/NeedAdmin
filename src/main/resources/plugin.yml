@@ -1,0 +1,8 @@
+name: AdminSystem
+version: '1.4'
+main: Admin.AdminSystem.AdminSystem
+api-version: '1.21'
+commands:
+  needadmin:
+    description: admin help request
+    usage: /<command>
